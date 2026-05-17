@@ -1,0 +1,1182 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>神经网络训练实验室</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='13' fill='%2377231d'/%3E%3Ccircle cx='16' cy='16' r='6' fill='%23faf9f7'/%3E%3C/svg%3E">
+    <style>
+        :root {
+            --paper: #f5f0e6;
+            --panel: #fbf7ed;
+            --ink: #171717;
+            --muted: #6c675e;
+            --line: #cfc6b8;
+            --line-dark: #958a7d;
+            --red: #8d1f1f;
+            --red-dark: #5d0d0d;
+            --green: #16451f;
+            --green-soft: #dbe5d8;
+            --mono: "SF Mono", "Menlo", "Consolas", monospace;
+            --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            --serif: Georgia, "Times New Roman", serif;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: #fff;
+            color: var(--ink);
+            font-family: var(--sans);
+            line-height: 1.42;
+        }
+
+        .page {
+            width: min(1920px, calc(100vw - 56px));
+            margin: 0 auto;
+            padding: 28px 0 24px;
+        }
+
+        .masthead {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 24px;
+            align-items: start;
+            padding: 0 16px 14px;
+            border-bottom: 2px solid var(--line-dark);
+        }
+
+        .issue {
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        h1 {
+            margin: 0;
+            font-family: var(--serif);
+            font-size: clamp(40px, 4.2vw, 66px);
+            font-weight: 500;
+            line-height: 0.98;
+            letter-spacing: 0;
+        }
+
+        .deck {
+            max-width: 1050px;
+            margin: 10px 0 0;
+            font-family: var(--serif);
+            font-size: clamp(18px, 1.6vw, 24px);
+            color: #28251f;
+        }
+
+        .page-count {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 42px;
+            font-family: var(--serif);
+            font-size: 26px;
+        }
+
+        .device-note {
+            display: grid;
+            grid-template-columns: auto auto;
+            gap: 10px;
+            align-items: center;
+            color: #403b34;
+            font-size: 13px;
+            font-weight: 700;
+            line-height: 1.3;
+        }
+
+        .device-icons {
+            display: flex;
+            align-items: end;
+            gap: 6px;
+        }
+
+        .monitor,
+        .phone {
+            display: inline-block;
+            border: 2px solid var(--ink);
+        }
+
+        .monitor {
+            width: 38px;
+            height: 25px;
+            position: relative;
+        }
+
+        .monitor::after {
+            content: "";
+            position: absolute;
+            left: 13px;
+            bottom: -9px;
+            width: 12px;
+            height: 8px;
+            border-top: 2px solid var(--ink);
+        }
+
+        .phone {
+            width: 13px;
+            height: 26px;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 2fr;
+            grid-template-rows: 1fr 1fr;
+            gap: 16px;
+            padding: 16px 0 12px;
+        }
+
+        .panel {
+            min-width: 0;
+            background: rgba(251, 247, 237, 0.74);
+            border: 1px solid var(--line);
+            border-radius: 6px;
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.45);
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            gap: 18px;
+            align-items: start;
+            padding: 18px 22px 8px;
+        }
+
+        .panel h2 {
+            margin: 0;
+            font-family: var(--serif);
+            font-size: 30px;
+            font-weight: 700;
+        }
+
+        .panel-note,
+        .caption {
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .dataset-panel {
+            grid-area: 1 / 1 / 2 / 2;
+        }
+
+        .network-panel {
+            grid-area: 1 / 3 / 3 / 4;
+        }
+
+        .training-strip {
+            grid-area: 1 / 2 / 2 / 3;
+        }
+
+        .loss-panel {
+            grid-area: 2 / 1 / 3 / 3;
+        }
+
+        .preset-controls {
+            display: flex;
+            gap: 8px;
+        }
+
+        svg {
+            display: block;
+            width: 100%;
+        }
+
+        #playground {
+            height: auto;
+            height: 360px;
+        }
+
+        .plot-shell {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 86px;
+            gap: 12px;
+            align-items: center;
+            padding: 0 20px 14px;
+        }
+
+        .plot-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            align-items: center;
+            padding: 0 22px 16px;
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .legend-dot {
+            display: inline-block;
+            width: 11px;
+            height: 11px;
+            margin-right: 8px;
+            border-radius: 50%;
+            vertical-align: -1px;
+        }
+
+        .colorbar {
+            display: grid;
+            grid-template-rows: auto 176px auto;
+            gap: 8px;
+            justify-items: center;
+            color: var(--muted);
+            font-family: var(--mono);
+            font-size: 12px;
+        }
+
+        .colorbar-title {
+            font-family: var(--sans);
+            font-weight: 700;
+            color: #403b34;
+            line-height: 1.2;
+            text-align: center;
+        }
+
+        .colorbar-ramp {
+            width: 28px;
+            height: 176px;
+            border: 1px solid var(--line);
+            background: linear-gradient(180deg, var(--red), #efe1d8 50%, var(--green));
+        }
+
+        .grid-line {
+            stroke: rgba(255, 255, 255, 0.78);
+            stroke-width: 1;
+        }
+
+        .axis-line {
+            stroke: #81786d;
+            stroke-width: 1.4;
+        }
+
+        .axis-label {
+            fill: #29251f;
+            font-family: var(--serif);
+            font-size: 18px;
+        }
+
+        .point {
+            stroke: rgba(251, 247, 237, 0.8);
+            stroke-width: 2;
+        }
+
+        #network {
+            height: 100%;
+            min-height: 400px;
+        }
+
+        .connection {
+            stroke-linecap: round;
+        }
+
+        .connection.dim {
+            opacity: 0.18;
+        }
+
+        .neuron {
+            stroke: #292521;
+            stroke-width: 1.2;
+        }
+
+        .layer-label,
+        .tiny-label {
+            fill: #27231e;
+            font-family: var(--sans);
+            font-size: 12px;
+        }
+
+        .training-strip {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 16px;
+            padding: 14px 20px;
+        }
+
+        .phases {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 18px;
+        }
+
+        .phase {
+            position: relative;
+            display: grid;
+            grid-template-columns: 34px 1fr;
+            gap: 10px;
+            align-items: center;
+            color: var(--muted);
+            font-size: 15px;
+            white-space: nowrap;
+        }
+
+        .phase::after {
+            content: "";
+            position: absolute;
+            right: -12px;
+            top: 17px;
+            width: 74px;
+            border-top: 1px solid var(--line-dark);
+        }
+
+        .phase:last-child::after {
+            display: none;
+        }
+
+        .phase-index {
+            display: inline-grid;
+            place-items: center;
+            width: 32px;
+            height: 32px;
+            border: 1px solid var(--line-dark);
+            border-radius: 50%;
+            background: var(--panel);
+            font-family: var(--serif);
+            font-weight: 700;
+        }
+
+        .phase.active {
+            color: var(--ink);
+            font-weight: 700;
+        }
+
+        .phase.active .phase-index {
+            background: var(--red);
+            border-color: var(--red);
+            color: #fff;
+        }
+
+        .control-row {
+            display: grid;
+            grid-template-columns: repeat(3, 78px) 88px 88px;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .metrics-stack {
+            min-width: 108px;
+            padding-left: 18px;
+            border-left: 1px solid var(--line);
+            text-align: right;
+        }
+
+        .metric {
+            margin-bottom: 8px;
+        }
+
+        .metric-label {
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .metric-value {
+            font-family: var(--serif);
+            font-size: 28px;
+            line-height: 1.05;
+        }
+
+        .metric-value.loss {
+            color: var(--red);
+        }
+
+        #loss-chart {
+            height: 200px;
+            min-height: 160px;
+            padding: 0 18px 14px;
+        }
+
+        button,
+        select {
+            min-height: 38px;
+            border: 1px solid var(--line-dark);
+            border-radius: 4px;
+            background: rgba(251, 247, 237, 0.7);
+            color: var(--ink);
+            font: inherit;
+        }
+
+        button {
+            min-width: 42px;
+            padding: 0 14px;
+            cursor: pointer;
+        }
+
+        button.primary {
+            min-width: 78px;
+            padding: 0 8px;
+            min-height: 62px;
+            background: linear-gradient(180deg, var(--red-dark), #390909);
+            color: #fff;
+            font-weight: 700;
+        }
+
+        button.icon-btn {
+            min-width: 78px;
+            padding: 0 8px;
+            min-height: 62px;
+            font-size: 15px;
+            font-weight: 700;
+        }
+
+        button:hover,
+        select:hover {
+            background: var(--ink);
+            color: var(--paper);
+        }
+
+        label {
+            display: grid;
+            gap: 8px;
+            color: #3c372f;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .range-meta {
+            display: flex;
+            justify-content: space-between;
+            color: var(--muted);
+            font-family: var(--mono);
+            font-size: 12px;
+            font-weight: 400;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            accent-color: var(--red);
+        }
+
+        select {
+            width: 156px;
+            padding: 0 10px;
+            font-weight: 700;
+        }
+
+        .footer-line {
+            display: flex;
+            justify-content: space-between;
+            padding: 18px 0 0;
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .tip {
+            position: fixed;
+            z-index: 10;
+            display: none;
+            max-width: 240px;
+            white-space: pre-line;
+            padding: 8px 10px;
+            background: var(--ink);
+            color: var(--paper);
+            border-radius: 4px;
+            font-family: var(--mono);
+            font-size: 12px;
+            pointer-events: none;
+        }
+
+        @media (max-width: 1060px) {
+            .page {
+                width: min(760px, calc(100vw - 28px));
+            }
+
+            .masthead,
+            .dashboard-grid,
+            .training-strip,
+            .control-row,
+            .plot-shell,
+            .source-columns {
+                grid-template-columns: 1fr;
+            }
+
+            .dataset-panel,
+            .network-panel,
+            .training-strip,
+            .loss-panel {
+                grid-area: auto;
+            }
+
+            .page-count {
+                justify-content: start;
+                margin-bottom: 0;
+            }
+
+            .metrics-stack {
+                padding-left: 0;
+                border-left: 0;
+                text-align: left;
+            }
+
+            .phase::after {
+                display: none;
+            }
+
+            #playground,
+            #network {
+                min-height: 360px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="page">
+        <header class="masthead">
+            <div>
+                <div class="issue">INTERACTIVE LEARNING SYSTEM</div>
+                <h1>Neural Network Training Visualizer</h1>
+                <p class="deck">可交互的二维分类画布、网络结构动画与损失曲线，直观理解前向传播、反向传播与参数更新过程。</p>
+            </div>
+        </header>
+
+        <section class="dashboard-grid">
+            <div class="panel dataset-panel">
+                <div class="panel-header">
+                    <div>
+                        <h2>二维分类画布</h2>
+                        <div class="panel-note">数据按余弦曲线分布，决策边界随训练实时变化</div>
+                    </div>
+                </div>
+                <div class="plot-shell">
+                    <svg id="playground" viewBox="0 0 900 520" role="img" aria-label="二维分类训练画布"></svg>
+                    <div class="colorbar" aria-hidden="true">
+                        <div class="colorbar-title">sigmoid<br>输出概率</div>
+                        <div>1.0</div>
+                        <div class="colorbar-ramp"></div>
+                        <div>0.0</div>
+                    </div>
+                </div>
+                <div class="plot-legend">
+                    <span><span class="legend-dot" style="background: var(--green);"></span>类别 0（绿）</span>
+                    <span>P(y=1) &lt; 0.5</span>
+                    <span><span class="legend-dot" style="background: var(--red);"></span>类别 1（红）</span>
+                    <span>P(y=1) ≥ 0.5</span>
+                </div>
+            </div>
+
+            <section class="panel training-strip" aria-label="控制栏">
+                <div>
+                    <div class="phases" aria-label="训练阶段">
+                        <div class="phase active" data-phase="0"><span class="phase-index">1</span><span>前向传播</span></div>
+                        <div class="phase" data-phase="1"><span class="phase-index">2</span><span>损失计算</span></div>
+                        <div class="phase" data-phase="2"><span class="phase-index">3</span><span>反向传播</span></div>
+                        <div class="phase" data-phase="3"><span class="phase-index">4</span><span>参数更新</span></div>
+                    </div>
+                    <div class="control-row">
+                        <button id="toggle-run" class="primary" title="播放或暂停训练">播放 / 暂停</button>
+                        <button id="step-once" class="icon-btn" title="单步训练">▶<br>单步执行</button>
+                        <button id="reset-net" class="icon-btn" title="重置网络">↻<br>重置网络</button>
+                        <label>
+                            学习率 <span id="lr-label">0.30</span>
+                            <input id="learning-rate" type="range" min="0.01" max="1" step="0.01" value="0.3">
+                            <span class="range-meta"><span>0.01</span><span>1.0</span></span>
+                        </label>
+                        <label>
+                            最大 Epoch <span id="max-epoch-label">30000</span>
+                            <input id="max-epoch" type="range" min="1000" max="100000" step="1000" value="30000">
+                            <span class="range-meta"><span>1000</span><span>100000</span></span>
+                        </label>
+                    </div>
+                </div>
+                <div class="metrics-stack">
+                    <div class="metric">
+                        <div class="metric-label">Epoch</div>
+                        <div id="epoch-value" class="metric-value">0</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">Loss</div>
+                        <div id="loss-value" class="metric-value loss">0.0000</div>
+                    </div>
+                </div>
+            </section>
+
+            <div class="panel network-panel">
+                <div class="panel-header">
+                    <div>
+                        <h2>网络结构图</h2>
+                    </div>
+                </div>
+                <svg id="network" viewBox="0 0 560 330" role="img" aria-label="神经网络结构图"></svg>
+                <p class="caption" style="padding: 0 24px 16px;">节点颜色表示激活值（a），绿色线为前向传播，红色线为反向传播</p>
+            </div>
+
+            <div class="panel loss-panel">
+                <div class="panel-header">
+                    <h2>损失曲线</h2>
+                </div>
+                <svg id="loss-chart" viewBox="0 0 440 130" role="img" aria-label="损失曲线"></svg>
+            </div>
+
+        </section>
+
+        <footer class="footer-line">
+            <span>Design with clarity. Learn with depth.</span>
+            <span>© 2024 Interactive Learning System</span>
+        </footer>
+    </main>
+    <div id="tooltip" class="tip"></div>
+
+    <script id="neural-network-engine">
+(function () {
+    "use strict";
+
+    function sigmoid(x) {
+        return 1 / (1 + Math.exp(-x));
+    }
+
+    function init(layerSizes) {
+        const weights = [];
+        const biases = [];
+        for (let l = 0; l < layerSizes.length - 1; l++) {
+            const fanIn = layerSizes[l];
+            const fanOut = layerSizes[l + 1];
+            const scale = Math.sqrt(1 / fanIn);
+            const layerWeights = [];
+            const layerBiases = [];
+            for (let j = 0; j < fanOut; j++) {
+                const neuronWeights = [];
+                for (let k = 0; k < fanIn; k++) {
+                    neuronWeights.push((Math.random() * 2 - 1) * scale);
+                }
+                layerWeights.push(neuronWeights);
+                layerBiases.push(0);
+            }
+            weights.push(layerWeights);
+            biases.push(layerBiases);
+        }
+        return { sizes: layerSizes.slice(), weights, biases };
+    }
+
+    function forward(net, input) {
+        const activations = [input.slice()];
+        const preActivations = [input.slice()];
+        let currentInput = input.slice();
+        for (let l = 0; l < net.weights.length; l++) {
+            const layerPre = [];
+            const layerAct = [];
+            for (let j = 0; j < net.weights[l].length; j++) {
+                let sum = net.biases[l][j];
+                for (let k = 0; k < currentInput.length; k++) {
+                    sum += net.weights[l][j][k] * currentInput[k];
+                }
+                layerPre.push(sum);
+                layerAct.push(sigmoid(sum));
+            }
+            preActivations.push(layerPre);
+            activations.push(layerAct);
+            currentInput = layerAct;
+        }
+        return { activations, preActivations };
+    }
+
+    function computeLoss(predictions, targets) {
+        let totalLoss = 0;
+        for (let i = 0; i < predictions.length; i++) {
+            for (let j = 0; j < predictions[i].length; j++) {
+                const error = predictions[i][j] - targets[i][j];
+                totalLoss += error * error;
+            }
+        }
+        return totalLoss / predictions.length;
+    }
+
+    function backward(net, input, target) {
+        const result = forward(net, input);
+        const activations = result.activations;
+        const numLayers = net.weights.length;
+        const weightGradients = net.weights.map((layer) => layer.map((neuron) => neuron.map(() => 0)));
+        const biasGradients = net.biases.map((layer) => layer.map(() => 0));
+        const deltas = [];
+        const outputLayer = numLayers - 1;
+        const outputDeltas = [];
+
+        for (let j = 0; j < net.weights[outputLayer].length; j++) {
+            const activation = activations[outputLayer + 1][j];
+            const error = activation - target[j];
+            outputDeltas.push(2 * error * activation * (1 - activation));
+        }
+        deltas[outputLayer] = outputDeltas;
+
+        for (let l = outputLayer - 1; l >= 0; l--) {
+            const layerDeltas = [];
+            for (let j = 0; j < net.weights[l].length; j++) {
+                let sum = 0;
+                for (let k = 0; k < net.weights[l + 1].length; k++) {
+                    sum += deltas[l + 1][k] * net.weights[l + 1][k][j];
+                }
+                const activation = activations[l + 1][j];
+                layerDeltas.push(sum * activation * (1 - activation));
+            }
+            deltas[l] = layerDeltas;
+        }
+
+        for (let l = 0; l < numLayers; l++) {
+            for (let j = 0; j < net.weights[l].length; j++) {
+                for (let k = 0; k < net.weights[l][j].length; k++) {
+                    weightGradients[l][j][k] = deltas[l][j] * activations[l][k];
+                }
+                biasGradients[l][j] = deltas[l][j];
+            }
+        }
+
+        return { weightGradients, biasGradients };
+    }
+
+    function updateParameters(net, gradients, learningRate) {
+        for (let l = 0; l < net.weights.length; l++) {
+            for (let j = 0; j < net.weights[l].length; j++) {
+                for (let k = 0; k < net.weights[l][j].length; k++) {
+                    net.weights[l][j][k] -= learningRate * gradients.weightGradients[l][j][k];
+                }
+                net.biases[l][j] -= learningRate * gradients.biasGradients[l][j];
+            }
+        }
+    }
+
+    function trainStep(net, samples, learningRate) {
+        const totalWeightGrads = net.weights.map((layer) => layer.map((neuron) => neuron.map(() => 0)));
+        const totalBiasGrads = net.biases.map((layer) => layer.map(() => 0));
+        const predictions = [];
+
+        for (const sample of samples) {
+            const grads = backward(net, sample.input, sample.target);
+            for (let l = 0; l < net.weights.length; l++) {
+                for (let j = 0; j < net.weights[l].length; j++) {
+                    for (let k = 0; k < net.weights[l][j].length; k++) {
+                        totalWeightGrads[l][j][k] += grads.weightGradients[l][j][k];
+                    }
+                    totalBiasGrads[l][j] += grads.biasGradients[l][j];
+                }
+            }
+            predictions.push(forward(net, sample.input).activations.at(-1));
+        }
+
+        for (let l = 0; l < net.weights.length; l++) {
+            for (let j = 0; j < net.weights[l].length; j++) {
+                for (let k = 0; k < net.weights[l][j].length; k++) {
+                    totalWeightGrads[l][j][k] /= samples.length;
+                }
+                totalBiasGrads[l][j] /= samples.length;
+            }
+        }
+
+        updateParameters(net, { weightGradients: totalWeightGrads, biasGradients: totalBiasGrads }, learningRate);
+        return {
+            loss: computeLoss(predictions, samples.map((sample) => sample.target)),
+            predictions,
+        };
+    }
+
+    function getState(net) {
+        return {
+            sizes: net.sizes.slice(),
+            weights: net.weights.map((layer) => layer.map((neuron) => neuron.slice())),
+            biases: net.biases.map((layer) => layer.slice()),
+        };
+    }
+
+    function clamp01(value) {
+        return Math.max(0, Math.min(1, value));
+    }
+
+    function generateCosineData(count) {
+        const data = [];
+        for (let i = 0; i < count; i++) {
+            const x = Math.random();
+            const noise = (Math.random() - 0.5) * 0.12;
+            const boundary = 0.5 * (1 + Math.cos(x * Math.PI * 2));
+            const y = Math.random();
+            data.push({ input: [x, clamp01(y + noise)], target: [y < boundary ? 0 : 1] });
+        }
+        return data;
+    }
+
+    window.NeuralNetwork = {
+        sigmoid,
+        init,
+        forward,
+        computeLoss,
+        backward,
+        updateParameters,
+        trainStep,
+        getState,
+        generateCosineData,
+    };
+}());
+    </script>
+
+    <script>
+(function () {
+    "use strict";
+
+    const Engine = window.NeuralNetwork;
+    const red = "#77231d";
+    const green = "#254021";
+    const ink = "#1a1a1a";
+    const paper = "#fffefa";
+    const playground = document.getElementById("playground");
+    const networkSvg = document.getElementById("network");
+    const lossChart = document.getElementById("loss-chart");
+    const tooltip = document.getElementById("tooltip");
+    const phaseEls = Array.from(document.querySelectorAll(".phase"));
+    const epochValue = document.getElementById("epoch-value");
+    const lossValue = document.getElementById("loss-value");
+    const lrInput = document.getElementById("learning-rate");
+    const lrLabel = document.getElementById("lr-label");
+    const maxEpochInput = document.getElementById("max-epoch");
+    const maxEpochLabel = document.getElementById("max-epoch-label");
+    const toggleRun = document.getElementById("toggle-run");
+
+    const width = 900;
+    const height = 520;
+    const pad = 44;
+    let net = Engine.init([2, 3, 2, 3, 1]);
+    let samples = Engine.generateCosineData(144);
+    let running = false;
+    let epoch = 0;
+    let phase = 0;
+    let latestLoss = 0;
+    let lossHistory = [];
+    let maxTrainingEpochs = 30000;
+    let lastActivations = Engine.forward(net, [0.5, 0.5]).activations;
+    let lastGradients = null;
+
+    function svgEl(name, attrs = {}) {
+        const el = document.createElementNS("http://www.w3.org/2000/svg", name);
+        for (const [key, value] of Object.entries(attrs)) {
+            el.setAttribute(key, value);
+        }
+        return el;
+    }
+
+    function plotX(x) {
+        return pad + x * (width - pad * 2);
+    }
+
+    function plotY(y) {
+        return height - pad - y * (height - pad * 2);
+    }
+
+    function colorMix(value, alpha = 0.18) {
+        const c0 = [22, 69, 31];
+        const c1 = [141, 31, 31];
+        const r = Math.round(c0[0] * (1 - value) + c1[0] * value);
+        const g = Math.round(c0[1] * (1 - value) + c1[1] * value);
+        const b = Math.round(c0[2] * (1 - value) + c1[2] * value);
+        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    }
+
+    function renderPlayground() {
+        playground.textContent = "";
+        const grid = 40;
+        const cellW = (width - pad * 2) / grid;
+        const cellH = (height - pad * 2) / grid;
+
+        for (let gy = 0; gy < grid; gy++) {
+            for (let gx = 0; gx < grid; gx++) {
+                const input = [(gx + 0.5) / grid, (gy + 0.5) / grid];
+                const output = Engine.forward(net, input).activations.at(-1)[0];
+                playground.appendChild(svgEl("rect", {
+                    x: pad + gx * cellW,
+                    y: height - pad - (gy + 1) * cellH,
+                    width: cellW + 0.4,
+                    height: cellH + 0.4,
+                    fill: colorMix(output),
+                }));
+            }
+        }
+
+        for (let i = 0; i <= 10; i++) {
+            const x = pad + i * (width - pad * 2) / 10;
+            const y = pad + i * (height - pad * 2) / 10;
+            playground.appendChild(svgEl("line", { x1: x, y1: pad, x2: x, y2: height - pad, class: "grid-line" }));
+            playground.appendChild(svgEl("line", { x1: pad, y1: y, x2: width - pad, y2: y, class: "grid-line" }));
+        }
+        playground.appendChild(svgEl("line", { x1: pad, y1: height - pad, x2: width - pad, y2: height - pad, class: "axis-line" }));
+        playground.appendChild(svgEl("line", { x1: pad, y1: pad, x2: pad, y2: height - pad, class: "axis-line" }));
+        playground.appendChild(svgEl("line", { x1: width - pad, y1: height - pad, x2: width - pad - 9, y2: height - pad - 5, class: "axis-line" }));
+        playground.appendChild(svgEl("line", { x1: width - pad, y1: height - pad, x2: width - pad - 9, y2: height - pad + 5, class: "axis-line" }));
+        playground.appendChild(svgEl("line", { x1: pad, y1: pad, x2: pad - 5, y2: pad + 9, class: "axis-line" }));
+        playground.appendChild(svgEl("line", { x1: pad, y1: pad, x2: pad + 5, y2: pad + 9, class: "axis-line" }));
+        const xLabel = svgEl("text", { x: width - pad + 10, y: height - pad + 6, class: "axis-label" });
+        xLabel.textContent = "x";
+        playground.appendChild(xLabel);
+        const yLabel = svgEl("text", { x: pad - 8, y: pad - 12, class: "axis-label" });
+        yLabel.textContent = "y";
+        playground.appendChild(yLabel);
+
+        for (const sample of samples) {
+            playground.appendChild(svgEl("circle", {
+                cx: plotX(sample.input[0]),
+                cy: plotY(sample.input[1]),
+                r: 7,
+                fill: sample.target[0] === 1 ? red : green,
+                class: "point",
+            }));
+        }
+    }
+
+    function showTip(event, lines) {
+        tooltip.textContent = lines.join("\n");
+        tooltip.style.display = "block";
+        tooltip.style.left = `${event.clientX + 14}px`;
+        tooltip.style.top = `${event.clientY + 14}px`;
+    }
+
+    function hideTip() {
+        tooltip.style.display = "none";
+    }
+
+    function renderNetwork() {
+        networkSvg.textContent = "";
+        const layers = [2, 3, 2, 3, 1];
+        const xs = [40, 155, 280, 405, 520];
+        const positions = [];
+
+        const gap = 80;
+        const centerY = 165;
+        for (let l = 0; l < layers.length; l++) {
+            positions[l] = [];
+            const offset = (layers[l] - 1) * gap / 2;
+            for (let j = 0; j < layers[l]; j++) {
+                positions[l][j] = {
+                    x: xs[l],
+                    y: centerY - offset + j * gap,
+                };
+            }
+        }
+
+        for (let l = 0; l < net.weights.length; l++) {
+            for (let j = 0; j < net.weights[l].length; j++) {
+                for (let k = 0; k < net.weights[l][j].length; k++) {
+                    const w = net.weights[l][j][k];
+                    const grad = lastGradients ? lastGradients.weightGradients[l][j][k] : 0;
+                    const start = positions[l][k];
+                    const end = positions[l + 1][j];
+                    const dx = end.x - start.x;
+                    const dy = end.y - start.y;
+                    const segLen = Math.hypot(dx, dy) || 1;
+                    const nx = -dy / segLen;
+                    const ny = dx / segLen;
+                    const cpOffset = dx * 0.4;
+                    const forwardWidth = Math.max(1, 0.5 + Math.min(3, Math.abs(w) * 2));
+                    const backwardWidth = Math.max(1, 0.5 + Math.min(3, Math.log2(1 + Math.abs(grad) * 200) * 1.2));
+                    const forwardShift = forwardWidth / 2 + 0.5;
+                    const backwardShift = backwardWidth / 2 + 0.5;
+
+                    // 前向传播：下方（+n 方向）
+                    const fsx = start.x + nx * forwardShift;
+                    const fsy = start.y + ny * forwardShift;
+                    const fex = end.x + nx * forwardShift;
+                    const fey = end.y + ny * forwardShift;
+                    const forwardLine = svgEl("path", {
+                        d: `M${fsx},${fsy} C${fsx + cpOffset},${fsy} ${fex - cpOffset},${fey} ${fex},${fey}`,
+                        stroke: green,
+                        "stroke-width": forwardWidth,
+                        fill: "none",
+                        class: "connection",
+                    });
+                    forwardLine.addEventListener("mousemove", (event) => showTip(event, [`weight: ${w.toFixed(4)}`]));
+                    forwardLine.addEventListener("mouseleave", hideTip);
+                    networkSvg.appendChild(forwardLine);
+
+                    // 反向传播：上方（-n 方向），也从左到右绘制
+                    const bsx = start.x - nx * backwardShift;
+                    const bsy = start.y - ny * backwardShift;
+                    const bex = end.x - nx * backwardShift;
+                    const bey = end.y - ny * backwardShift;
+                    const backwardLine = svgEl("path", {
+                        d: `M${bsx},${bsy} C${bsx + cpOffset},${bsy} ${bex - cpOffset},${bey} ${bex},${bey}`,
+                        stroke: red,
+                        "stroke-width": backwardWidth,
+                        fill: "none",
+                        class: "connection",
+                    });
+                    backwardLine.addEventListener("mousemove", (event) => showTip(event, [`gradient: ${grad.toFixed(4)}`]));
+                    backwardLine.addEventListener("mouseleave", hideTip);
+                    networkSvg.appendChild(backwardLine);
+                }
+            }
+        }
+
+        for (let l = 0; l < layers.length; l++) {
+            const label = svgEl("text", { x: xs[l], y: 306, "text-anchor": "middle", class: "layer-label" });
+            label.textContent = ["输入", "隐藏 1", "隐藏 2", "隐藏 3", "输出"][l];
+            networkSvg.appendChild(label);
+
+            for (let j = 0; j < layers[l]; j++) {
+                const activation = lastActivations[l]?.[j] ?? 0;
+                const shade = Math.round(245 - activation * 155);
+                const circle = svgEl("circle", {
+                    cx: positions[l][j].x,
+                    cy: positions[l][j].y,
+                    r: 22,
+                    fill: `rgb(${shade}, ${shade}, ${shade})`,
+                    class: "neuron",
+                });
+                circle.addEventListener("mousemove", (event) => {
+                    const bias = l === 0 ? "input" : net.biases[l - 1][j].toFixed(4);
+                    showTip(event, [`activation: ${activation.toFixed(4)}`, `bias: ${bias}`]);
+                });
+                circle.addEventListener("mouseleave", hideTip);
+                networkSvg.appendChild(circle);
+
+                const value = svgEl("text", {
+                    x: positions[l][j].x,
+                    y: positions[l][j].y + 4,
+                    "text-anchor": "middle",
+                    class: "tiny-label",
+                    fill: activation > 0.65 ? paper : ink,
+                });
+                value.textContent = activation.toFixed(2);
+                networkSvg.appendChild(value);
+            }
+        }
+    }
+
+    function renderLossChart() {
+        lossChart.textContent = "";
+        const left = 44;
+        const right = 420;
+        const top = 18;
+        const bottom = 104;
+        const chartWidth = right - left;
+        const chartHeight = bottom - top;
+        const minEpoch = 0;
+        const maxEpoch = maxTrainingEpochs;
+        const maxLoss = Math.max(...lossHistory.map((item) => item.loss), 0.001);
+
+        lossChart.appendChild(svgEl("line", { x1: left, y1: bottom, x2: right, y2: bottom, stroke: "#d8d3cc" }));
+        lossChart.appendChild(svgEl("line", { x1: left, y1: top, x2: left, y2: bottom, stroke: "#d8d3cc" }));
+
+        for (let i = 0; i <= 4; i++) {
+            const y = bottom - i * chartHeight / 4;
+            const value = maxLoss * i / 4;
+            lossChart.appendChild(svgEl("line", { x1: left, y1: y, x2: right, y2: y, stroke: "#e5ded2", "stroke-dasharray": "3 4" }));
+            const label = svgEl("text", { x: left - 8, y: y + 4, "text-anchor": "end", class: "tiny-label" });
+            label.textContent = value.toFixed(value >= 0.1 ? 1 : 2);
+            lossChart.appendChild(label);
+        }
+
+        for (let i = 0; i <= 4; i++) {
+            const x = left + i * chartWidth / 4;
+            const value = minEpoch + (maxEpoch - minEpoch) * i / 4;
+            lossChart.appendChild(svgEl("line", { x1: x, y1: top, x2: x, y2: bottom, stroke: "#e5ded2", "stroke-dasharray": "3 4" }));
+            const label = svgEl("text", { x, y: bottom + 18, "text-anchor": "middle", class: "tiny-label" });
+            label.textContent = Math.round(value);
+            lossChart.appendChild(label);
+        }
+
+        const yTitle = svgEl("text", { x: 12, y: top + 5, class: "tiny-label" });
+        yTitle.textContent = "Loss";
+        lossChart.appendChild(yTitle);
+        const xTitle = svgEl("text", { x: right - 8, y: bottom + 18, class: "tiny-label" });
+        xTitle.textContent = "Epoch";
+        lossChart.appendChild(xTitle);
+        if (lossHistory.length < 2) return;
+
+        const sampled = lossHistory.filter((item) => item.epoch % Math.max(1, Math.floor(maxTrainingEpochs / 200)) === 0);
+        if (sampled.length < 2) return;
+        const points = sampled.map((item) => {
+            const x = left + ((item.epoch - minEpoch) / Math.max(1, maxEpoch - minEpoch)) * chartWidth;
+            const y = bottom - (item.loss / maxLoss) * chartHeight;
+            return `${x},${y}`;
+        });
+        lossChart.appendChild(svgEl("polyline", {
+            points: points.join(" "),
+            fill: "none",
+            stroke: red,
+            "stroke-width": 2,
+        }));
+    }
+
+    function setPhase(nextPhase) {
+        phase = nextPhase;
+        for (const el of phaseEls) {
+            el.classList.toggle("active", Number(el.dataset.phase) === phase);
+        }
+    }
+
+    function updateMetrics() {
+        epochValue.textContent = String(epoch);
+        lossValue.textContent = latestLoss.toFixed(4);
+    }
+
+    function trainOnce() {
+        if (samples.length === 0) return;
+        if (epoch >= maxTrainingEpochs) {
+            running = false;
+            toggleRun.textContent = "训练完成";
+            return;
+        }
+        setPhase(0);
+        lastActivations = Engine.forward(net, samples[epoch % samples.length].input).activations;
+        setPhase(1);
+        const learningRate = Number(lrInput.value);
+        setPhase(2);
+        const sampleForGrad = samples[epoch % samples.length];
+        lastGradients = Engine.backward(net, sampleForGrad.input, sampleForGrad.target);
+        const result = Engine.trainStep(net, samples, learningRate);
+        setPhase(3);
+        latestLoss = result.loss;
+        epoch++;
+        lossHistory.push({ epoch, loss: latestLoss });
+        if (lossHistory.length > maxTrainingEpochs) lossHistory.shift();
+        updateMetrics();
+        renderNetwork();
+        renderLossChart();
+        if (epoch % 2 === 0) renderPlayground();
+    }
+
+    function animationLoop() {
+        if (running) {
+            for (let i = 0; i < 4; i++) trainOnce();
+        }
+        requestAnimationFrame(animationLoop);
+    }
+
+    function resetNetwork() {
+        net = Engine.init([2, 3, 2, 3, 1]);
+        epoch = 0;
+        latestLoss = 0;
+        lossHistory = [];
+        lastActivations = Engine.forward(net, [0.5, 0.5]).activations;
+        setPhase(0);
+        updateMetrics();
+        renderPlayground();
+        renderNetwork();
+        renderLossChart();
+    }
+
+    toggleRun.addEventListener("click", () => {
+        running = !running;
+        toggleRun.textContent = running ? "暂停" : "播放 / 暂停";
+    });
+    document.getElementById("step-once").addEventListener("click", trainOnce);
+    document.getElementById("reset-net").addEventListener("click", resetNetwork);
+    lrInput.addEventListener("input", () => {
+        lrLabel.textContent = Number(lrInput.value).toFixed(2);
+    });
+    maxEpochInput.addEventListener("input", () => {
+        maxTrainingEpochs = Number(maxEpochInput.value);
+        maxEpochLabel.textContent = maxTrainingEpochs;
+    });
+    const initialPredictions = samples.map((s) => Engine.forward(net, s.input).activations.at(-1));
+    lossHistory.push({ epoch: 0, loss: Engine.computeLoss(initialPredictions, samples.map((s) => s.target)) });
+    renderPlayground();
+    renderNetwork();
+    renderLossChart();
+    animationLoop();
+}());
+    </script>
+</body>
+</html>
