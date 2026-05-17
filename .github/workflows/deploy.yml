@@ -7,12 +7,18 @@ on:
 
 permissions:
   contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout 本仓库
+      - name: Checkout
         uses: actions/checkout@v4
 
       - name: 设置 Node.js
@@ -27,27 +33,18 @@ jobs:
       - name: 构建 VitePress
         run: npm run docs:build
 
-      - name: Checkout 主站仓库
-        uses: actions/checkout@v4
+      - name: 上传构建产物
+        uses: actions/upload-pages-artifact@v3
         with:
-          repository: JackieAnxis/jackieanxis.github.io
-          token: ${{ secrets.DEPLOY_TOKEN }}
-          path: main-site
-
-      - name: 部署到主站子目录
-        run: |
-          rm -rf main-site/llm-for-everyone
-          mkdir -p main-site/llm-for-everyone
-          cp -r docs/.vitepress/dist/* main-site/llm-for-everyone/
-          cd main-site
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add llm-for-everyone/
-          git diff --cached --quiet || git commit -m "deploy: update llm-for-everyone"
-          git push
-
-      - name: 构建产物 Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: dist
           path: docs/.vitepress/dist
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: 部署到 GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
