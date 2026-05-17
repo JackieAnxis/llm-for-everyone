@@ -318,14 +318,22 @@
         }
 
         .training-strip {
-            padding: 10px 22px;
+            padding: 8px 22px;
         }
 
         .controls-bar {
             display: flex;
             align-items: center;
-            gap: 12px;
-            flex-wrap: wrap;
+            gap: 10px;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+        }
+
+        .controls-sep {
+            width: 1px;
+            height: 20px;
+            background: var(--line);
+            flex-shrink: 0;
         }
 
         .phases {
@@ -530,8 +538,8 @@
             }
 
             .controls-bar {
-                flex-direction: column;
-                align-items: stretch;
+                flex-wrap: wrap;
+                justify-content: center;
             }
 
             .phases {
@@ -626,13 +634,14 @@
             </div>
 
             <section class="panel training-strip" aria-label="控制栏">
-                <div class="phases" aria-label="训练阶段">
-                    <div class="phase active" data-phase="0"><span class="phase-index">1</span><span>前向传播</span></div>
-                    <div class="phase" data-phase="1"><span class="phase-index">2</span><span>损失计算</span></div>
-                    <div class="phase" data-phase="2"><span class="phase-index">3</span><span>反向传播</span></div>
-                    <div class="phase" data-phase="3"><span class="phase-index">4</span><span>参数更新</span></div>
-                </div>
                 <div class="controls-bar">
+                    <div class="phases" aria-label="训练阶段">
+                        <div class="phase active" data-phase="0"><span class="phase-index">1</span><span>前向传播</span></div>
+                        <div class="phase" data-phase="1"><span class="phase-index">2</span><span>损失计算</span></div>
+                        <div class="phase" data-phase="2"><span class="phase-index">3</span><span>反向传播</span></div>
+                        <div class="phase" data-phase="3"><span class="phase-index">4</span><span>参数更新</span></div>
+                    </div>
+                    <div class="controls-sep"></div>
                     <button id="toggle-run" class="primary" title="播放或暂停训练">播放 / 暂停</button>
                     <button id="step-once" class="icon-btn" title="单步训练">▶ 单步</button>
                     <button id="reset-net" class="icon-btn" title="重置网络">↻ 重置</button>
