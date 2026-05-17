@@ -1,10 +1,17 @@
 import { defineConfig } from 'vitepress'
+import markdownItKatex from 'markdown-it-katex'
 
 export default defineConfig({
   lang: 'zh-CN',
   title: '大模型入门',
   description: '面向所有人的大语言模型入门教程',
   base: '/llm-for-everyone/',
+
+  markdown: {
+    config: (md) => {
+      md.use(markdownItKatex)
+    },
+  },
 
   themeConfig: {
     nav: [
