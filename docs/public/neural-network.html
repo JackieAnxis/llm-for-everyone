@@ -374,17 +374,18 @@
 
         label.inline {
             display: flex;
-            align-items: center;
-            gap: 8px;
+            flex-direction: column;
+            align-items: stretch;
+            gap: 4px;
             grid-column: auto;
             color: #3c372f;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 700;
             white-space: nowrap;
         }
 
         label.inline input[type="range"] {
-            width: 80px;
+            width: 90px;
         }
 
         label.inline .range-meta {
@@ -413,28 +414,38 @@
         }
 
         button {
-            min-width: 42px;
-            padding: 0 14px;
+            min-width: 0;
+            padding: 0 10px;
             cursor: pointer;
         }
 
         button.primary {
-            min-width: 0;
-            padding: 0 12px;
+            padding: 0 10px;
             background: linear-gradient(180deg, var(--red-dark), #390909);
             color: #fff;
             font-weight: 700;
             display: inline-flex;
             align-items: center;
+            gap: 6px;
+        }
+
+        .btn-label-play,
+        .btn-label-pause {
+            font-size: 13px;
         }
 
         button.icon-btn {
             min-width: 0;
-            padding: 0 8px;
+            padding: 0 10px;
             font-size: 13px;
             font-weight: 700;
             display: inline-flex;
             align-items: center;
+            gap: 6px;
+        }
+
+        .btn-label {
+            font-size: 13px;
         }
 
         button:hover,
@@ -562,9 +573,12 @@
                     <button id="toggle-run" class="primary" title="播放或暂停训练">
                         <svg class="icon-play" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="6,3 20,12 6,21"/></svg>
                         <svg class="icon-pause" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style="display:none"><rect x="5" y="3" width="4" height="18"/><rect x="15" y="3" width="4" height="18"/></svg>
+                        <span class="btn-label-play">播放</span>
+                        <span class="btn-label-pause" style="display:none">暂停</span>
                     </button>
                     <button id="reset-net" class="icon-btn" title="重置网络">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M3 12a9 9 0 1 1 3 6.7"/><polyline points="3 7 3 13 9 13"/></svg>
+                        <span class="btn-label">重置</span>
                     </button>
                     <label class="inline">
                         学习率 <span id="lr-label">0.30</span>
@@ -1117,6 +1131,8 @@
             running = false;
             toggleRun.querySelector(".icon-play").style.display = "block";
             toggleRun.querySelector(".icon-pause").style.display = "none";
+            toggleRun.querySelector(".btn-label-play").style.display = "inline";
+            toggleRun.querySelector(".btn-label-pause").style.display = "none";
             return;
         }
         setPhase(0);
@@ -1163,6 +1179,8 @@
         running = !running;
         toggleRun.querySelector(".icon-play").style.display = running ? "none" : "block";
         toggleRun.querySelector(".icon-pause").style.display = running ? "block" : "none";
+        toggleRun.querySelector(".btn-label-play").style.display = running ? "none" : "inline";
+        toggleRun.querySelector(".btn-label-pause").style.display = running ? "inline" : "none";
     });
     document.getElementById("reset-net").addEventListener("click", resetNetwork);
     lrInput.addEventListener("input", () => {
