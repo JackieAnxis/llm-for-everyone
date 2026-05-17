@@ -15,6 +15,9 @@ export default defineConfig({
   },
 
   themeConfig: {
+    outline: {
+      level: [2, 3],
+    },
     nav: [
       { text: '开始阅读', link: '/00-neural_network/00-overview' },
     ],
@@ -31,14 +34,34 @@ export default defineConfig({
         ],
       },
       {
-        text: '推理过程',
+        text: '大语言模型基础',
         items: [
-          { text: '推理过程概览', link: '/01-inference/01-overview' },
-          { text: '套聊天模板', link: '/01-inference/02-apply_chat_template' },
-          { text: 'Token 是怎么被切出来的', link: '/01-inference/03-tokenize' },
-          { text: '模型如何预测下一个 token', link: '/01-inference/04a-token_predict_overview' },
-          { text: 'Decoder Block 是什么', link: '/01-inference/04b-decoder_block' },
-          { text: '采样一个 token', link: '/01-inference/05-token_sample' },
+          { text: '语言模型：预测下一个词', link: '/01-llm_basics/01-language-model' },
+          { text: '从文字到数字', link: '/01-llm_basics/02-from-text-to-numbers' },
+          { text: '简单神经网络的局限', link: '/01-llm_basics/03-simple-network-limits' },
+          { text: 'Transformer 的直觉', link: '/01-llm_basics/04-transformer-intuition' },
+          { text: '大模型：为什么要"大"', link: '/01-llm_basics/05-why-scale-matters' },
+        ],
+      },
+      {
+        text: '大模型推理：如何预测下一个词',
+        items: [
+          { text: '推理过程概览', link: '/02-inference/01-overview' },
+          { text: 'Token 是怎么被切出来的', link: '/02-inference/03-tokenize' },
+          { text: '模型如何预测下一个 token', link: '/02-inference/04a-token_predict_overview' },
+          { text: 'Decoder Block 是什么', link: '/02-inference/04b-decoder_block' },
+          { text: '采样一个 token', link: '/02-inference/05-token_sample' },
+          { text: '推理过程回顾', link: '/02-inference/06-summary' },
+        ],
+      },
+      {
+        text: '预训练：让模型学会语言',
+        items: [
+          { text: '预训练做什么', link: '/03-pretraining/01-overview' },
+          { text: '数据准备', link: '/03-pretraining/02-data-preparation' },
+          { text: '训练循环', link: '/03-pretraining/03-training-loop' },
+          { text: '训练细节', link: '/03-pretraining/04-training-details' },
+          { text: '预训练回顾', link: '/03-pretraining/05-summary' },
         ],
       },
       {
