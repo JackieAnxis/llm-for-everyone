@@ -131,7 +131,7 @@
         .dashboard-grid {
             display: grid;
             grid-template-columns: 1fr 1.5fr;
-            grid-template-rows: auto minmax(260px, 0.7fr) minmax(160px, auto);
+            grid-template-rows: auto minmax(200px, 0.6fr) minmax(140px, auto);
             grid-template-areas:
                 "controls controls"
                 "dataset  network"
@@ -154,6 +154,42 @@
 
         .dataset-panel {
             grid-area: dataset;
+            display: flex;
+            flex-direction: row;
+            min-width: 0;
+            min-height: 0;
+        }
+
+        .metrics-sidebar {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 16px;
+            padding: 0 20px;
+            flex-shrink: 0;
+            min-width: 72px;
+        }
+
+        .metric {
+            text-align: center;
+        }
+
+        .metric-label {
+            color: var(--muted);
+            font-size: 12px;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .metric-value {
+            font-family: var(--mono);
+            font-size: 20px;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+
+        .metric-value.loss {
+            color: var(--red);
         }
 
         .network-panel {
@@ -477,6 +513,8 @@
             background: linear-gradient(180deg, var(--red-dark), #390909);
             color: #fff;
             font-weight: 700;
+            display: inline-flex;
+            align-items: center;
         }
 
         button.icon-btn {
@@ -551,6 +589,18 @@
                 justify-content: center;
             }
 
+            .dataset-panel {
+                flex-direction: column;
+            }
+
+            .metrics-sidebar {
+                flex-direction: row;
+                justify-content: center;
+                gap: 24px;
+                padding: 10px 20px;
+                min-width: auto;
+            }
+
             .dashboard-grid {
                 grid-template-columns: 1fr;
                 grid-template-rows: auto;
@@ -600,10 +650,14 @@
 
         <section class="dashboard-grid">
             <div class="panel dataset-panel">
-                <div class="panel-header">
-                    <div>
-                        <h2>二维分类画布</h2>
-                        <div class="panel-note">数据按余弦曲线分布，决策边界随训练实时变化</div>
+                <div class="metrics-sidebar">
+                    <div class="metric">
+                        <div class="metric-label">Epoch</div>
+                        <div id="epoch-value" class="metric-value">0</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">Loss</div>
+                        <div id="loss-value" class="metric-value loss">0.0000</div>
                     </div>
                 </div>
                 <div class="plot-shell">
@@ -614,12 +668,6 @@
                         <div class="colorbar-ramp"></div>
                         <div>0.0</div>
                     </div>
-                </div>
-                <div class="plot-legend">
-                    <span><span class="legend-dot" style="background: var(--green);"></span>类别 0（绿）</span>
-                    <span>P(y=1) &lt; 0.5</span>
-                    <span><span class="legend-dot" style="background: var(--red);"></span>类别 1（红）</span>
-                    <span>P(y=1) ≥ 0.5</span>
                 </div>
             </div>
 
@@ -642,7 +690,10 @@
                         <div class="phase" data-phase="3"><span class="phase-index">4</span><span>参数更新</span></div>
                     </div>
                     <div class="controls-sep"></div>
-                    <button id="toggle-run" class="primary" title="播放或暂停训练">播放 / 暂停</button>
+                    <button id="toggle-run" class="primary" title="播放或暂停训练">
+                        <svg class="icon-play" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="6,3 20,12 6,21"/></svg>
+                        <svg class="icon-pause" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style="display:none"><rect x="5" y="3" width="4" height="18"/><rect x="15" y="3" width="4" height="18"/></svg>
+                    </button>
                     <button id="step-once" class="icon-btn" title="单步训练">▶ 单步</button>
                     <button id="reset-net" class="icon-btn" title="重置网络">↻ 重置</button>
                     <label class="inline">
@@ -653,16 +704,6 @@
                         最大 Epoch <span id="max-epoch-label">30000</span>
                         <input id="max-epoch" type="range" min="1000" max="100000" step="1000" value="30000">
                     </label>
-                    <div class="metrics-inline">
-                        <div class="metric-chip">
-                            <span class="metric-chip-label">Epoch</span>
-                            <span id="epoch-value" class="metric-chip-value">0</span>
-                        </div>
-                        <div class="metric-chip">
-                            <span class="metric-chip-label">Loss</span>
-                            <span id="loss-value" class="metric-chip-value loss">0.0000</span>
-                        </div>
-                    </div>
                 </div>
             </section>
 
@@ -1173,7 +1214,8 @@
         if (samples.length === 0) return;
         if (epoch >= maxTrainingEpochs) {
             running = false;
-            toggleRun.textContent = "训练完成";
+            toggleRun.querySelector(".icon-play").style.display = "block";
+            toggleRun.querySelector(".icon-pause").style.display = "none";
             return;
         }
         setPhase(0);
@@ -1218,7 +1260,8 @@
 
     toggleRun.addEventListener("click", () => {
         running = !running;
-        toggleRun.textContent = running ? "暂停" : "播放 / 暂停";
+        toggleRun.querySelector(".icon-play").style.display = running ? "none" : "block";
+        toggleRun.querySelector(".icon-pause").style.display = running ? "block" : "none";
     });
     document.getElementById("step-once").addEventListener("click", trainOnce);
     document.getElementById("reset-net").addEventListener("click", resetNetwork);
