@@ -1154,8 +1154,6 @@
                         "stroke-dasharray": `${backwardWidth * 2.5} ${backwardWidth * 1.8}`,
                         class: "connection",
                     });
-                    backwardLine.addEventListener("mousemove", (event) => showTip(event, [`gradient: ${grad.toFixed(4)}`]));
-                    backwardLine.addEventListener("mouseleave", hideTip);
                     networkSvg.appendChild(backwardLine);
                 }
             }

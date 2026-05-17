@@ -4,6 +4,8 @@
 
 在“小测是否通过”的例子里，输入可以是学习时长和复习次数，输出是模型对通过或不通过的预测。模型一开始未必可靠，因为内部的权重、偏置等参数还不合适。训练要做的，就是让模型反复经历预测、比较真实答案、调整参数的过程，逐渐形成更合适的判断方式。
 
+如果你想把这个闭环”跑起来”看看，可以打开<a href="../neural-network.html" target="_blank">神经网络训练实验室</a>。它用一个二维分类问题展示前向传播、损失、反向传播和参数更新如何共同改变决策边界。
+
 ## 两个视角：推理和训练
 
 理解神经网络时，可以先分成两个视角。
@@ -255,4 +257,3 @@ for 循环 -> 训练循环
 - [从头开始写一个神经网络](https://github.com/dennybritz/nn-from-scratch)
 
 - [Neural Networks and Deep Learning](http://neuralnetworksanddeeplearning.com/)
-
