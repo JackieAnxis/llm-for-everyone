@@ -131,7 +131,7 @@
         .dashboard-grid {
             display: grid;
             grid-template-columns: 1fr 1.5fr;
-            grid-template-rows: auto minmax(300px, 1fr) minmax(200px, auto);
+            grid-template-rows: auto minmax(260px, 0.7fr) minmax(160px, auto);
             grid-template-areas:
                 "controls controls"
                 "dataset  network"
@@ -621,7 +621,7 @@
                         <h2>网络结构图</h2>
                     </div>
                 </div>
-                <svg id="network" viewBox="0 0 560 330" role="img" aria-label="神经网络结构图"></svg>
+                <svg id="network" viewBox="0 0 560 260" role="img" aria-label="神经网络结构图"></svg>
                 <p class="caption" style="padding: 0 24px 16px;">节点颜色表示激活值（a），绿色线为前向传播，红色线为反向传播</p>
             </div>
 
@@ -991,8 +991,8 @@
         const xs = [40, 155, 280, 405, 520];
         const positions = [];
 
-        const gap = 80;
-        const centerY = 165;
+        const gap = 58;
+        const centerY = 130;
         for (let l = 0; l < layers.length; l++) {
             positions[l] = [];
             const offset = (layers[l] - 1) * gap / 2;
@@ -1058,7 +1058,7 @@
         }
 
         for (let l = 0; l < layers.length; l++) {
-            const label = svgEl("text", { x: xs[l], y: 306, "text-anchor": "middle", class: "layer-label" });
+            const label = svgEl("text", { x: xs[l], y: 244, "text-anchor": "middle", class: "layer-label" });
             label.textContent = ["输入", "隐藏 1", "隐藏 2", "隐藏 3", "输出"][l];
             networkSvg.appendChild(label);
 
