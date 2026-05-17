@@ -1,4 +1,4 @@
-## 神经网络是什么
+# 神经网络是什么
 
 ![神经网络：根据输入来预测输出的函数](/assets/00-neural-network-01-what-is-neural-network.png)
 

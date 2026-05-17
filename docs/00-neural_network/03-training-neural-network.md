@@ -1,4 +1,4 @@
-## 如何训练一个神经网络
+# 如何训练一个神经网络
 
 ![训练神经网络：预测、损失、反向传播与参数更新](/assets/00-neural-network-03-training-neural-network.png)
 
