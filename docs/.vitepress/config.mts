@@ -1,5 +1,5 @@
 import { defineConfig } from 'vitepress'
-import markdownItKatex from 'markdown-it-katex'
+import { katex as katexPlugin } from '@mdit/plugin-katex'
 
 export default defineConfig({
   lang: 'zh-CN',
@@ -9,7 +9,7 @@ export default defineConfig({
 
   markdown: {
     config: (md) => {
-      md.use(markdownItKatex)
+      md.use(katexPlugin, { mathFence: true })
     },
   },
 
