@@ -130,11 +130,11 @@
 
         .dashboard-grid {
             display: grid;
-            grid-template-columns: 1fr 1.5fr;
-            grid-template-rows: 1fr minmax(160px, auto);
+            grid-template-columns: auto 1fr 1.5fr;
+            grid-template-rows: minmax(250px, 0.35fr) minmax(160px, auto);
             grid-template-areas:
-                "dataset  network"
-                "loss     network";
+                "controls dataset  network"
+                "loss     loss     network";
             gap: 16px;
             padding: 16px 0 12px;
         }
@@ -144,7 +144,7 @@
             flex-direction: column;
             min-width: 0;
             min-height: 0;
-            background: rgba(251, 247, 237, 0.74);
+            background: #fff;
             border: 1px solid var(--line);
             border-radius: 6px;
             overflow: hidden;
@@ -153,30 +153,21 @@
 
         .dataset-panel {
             grid-area: dataset;
-            display: flex;
-            flex-direction: row;
-            min-width: 0;
-            min-height: 0;
         }
 
-        .dataset-panel .controls-bar {
+        .controls-panel {
+            grid-area: controls;
+        }
+
+        .controls-panel .controls-bar {
             flex-direction: column;
             align-items: stretch;
-            padding: 10px 0 10px 14px;
             gap: 10px;
-            flex-shrink: 0;
-        }
-
-        .dataset-panel .controls-bar label.inline {
-            display: flex;
+            padding: 14px;
         }
 
         .network-panel {
             grid-area: network;
-        }
-
-        .training-strip {
-            grid-area: controls;
         }
 
         .loss-panel {
@@ -223,19 +214,102 @@
         }
 
         #playground {
+            grid-column: 2;
             flex: 1;
             height: 100%;
             min-height: 0;
         }
 
         .plot-shell {
+            display: contents;
+        }
+
+        .dataset-grid {
+            --plot-pad-ratio: 8.461538%;
+            --axis-left: 0px;
+            --axis-top: 0px;
+            --axis-width: 100%;
+            --axis-height: 100%;
+            --y-slider-left: 0px;
+            --svg-top: 0px;
+            --svg-height: 100%;
+            --colorbar-ramp-height: 120px;
+            position: relative;
             display: grid;
-            grid-template-columns: minmax(0, 1fr) 54px;
+            grid-template-columns: 36px minmax(0, 1fr) 54px;
+            grid-template-rows: minmax(0, 1fr) 28px;
             flex: 1;
-            gap: 10px;
-            align-items: center;
+            gap: 4px 10px;
             min-height: 0;
             padding: 0 14px 4px;
+        }
+
+        .axis-y-wrap {
+            position: absolute;
+            display: grid;
+            align-items: stretch;
+            justify-items: center;
+            width: 36px;
+            height: var(--svg-height);
+            left: var(--y-slider-left);
+            top: var(--svg-top);
+            z-index: 1;
+        }
+
+        .axis-y-label {
+            position: absolute;
+            top: 0;
+            font-size: 11px;
+            font-weight: 700;
+            color: #403b34;
+        }
+
+        .axis-y-value {
+            position: absolute;
+            bottom: 0;
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--muted);
+        }
+
+        .axis-y-wrap input[type="range"] {
+            align-self: start;
+            width: 100%;
+            height: var(--axis-height);
+            margin-top: var(--axis-top);
+            min-height: 0;
+            writing-mode: vertical-lr;
+            direction: rtl;
+            accent-color: var(--red);
+        }
+
+        .axis-x-wrap {
+            position: relative;
+            display: block;
+            grid-column: 2;
+        }
+
+        .axis-x-label {
+            position: absolute;
+            left: calc(var(--axis-left) + var(--axis-width) + 14px);
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 11px;
+            font-weight: 700;
+            color: #403b34;
+            white-space: nowrap;
+        }
+
+        .axis-x-label span {
+            font-family: var(--mono);
+            font-weight: 400;
+            color: var(--muted);
+        }
+
+        .axis-x-wrap input[type="range"] {
+            width: var(--axis-width);
+            margin-left: var(--axis-left);
+            accent-color: var(--red);
         }
 
         .plot-legend {
@@ -258,8 +332,11 @@
         }
 
         .colorbar {
+            grid-column: 3;
             display: grid;
-            grid-template-rows: auto 1fr auto;
+            grid-template-rows: auto auto var(--colorbar-ramp-height) auto;
+            align-self: center;
+            height: var(--svg-height);
             gap: 8px;
             justify-items: center;
             color: var(--muted);
@@ -278,9 +355,7 @@
 
         .colorbar-ramp {
             width: 28px;
-            min-height: 80px;
-            max-height: 176px;
-            height: 100%;
+            height: var(--colorbar-ramp-height);
             border: 1px solid var(--line);
             background: linear-gradient(180deg, var(--red), #efe1d8 50%, var(--green));
         }
@@ -327,7 +402,6 @@
 
         .layer-label,
         .tiny-label {
-            fill: #27231e;
             font-family: var(--sans);
             font-size: 12px;
         }
@@ -427,6 +501,7 @@
             display: inline-flex;
             align-items: center;
             gap: 6px;
+            white-space: nowrap;
         }
 
         .btn-label-play,
@@ -442,6 +517,7 @@
             display: inline-flex;
             align-items: center;
             gap: 6px;
+            white-space: nowrap;
         }
 
         .btn-label {
@@ -521,16 +597,20 @@
             }
 
             .dashboard-grid {
-                grid-template-columns: 1fr;
+                grid-template-columns: auto 1fr;
                 grid-template-rows: auto;
                 grid-template-areas:
-                    "controls"
-                    "dataset"
-                    "network"
-                    "loss";
+                    "controls dataset"
+                    "network  network"
+                    "loss     loss";
                 height: auto;
                 min-height: 0;
                 max-height: none;
+            }
+
+            .controls-panel .controls-bar {
+                flex-direction: column;
+                align-items: stretch;
             }
 
             .page-count {
@@ -568,12 +648,12 @@
         </header>
 
         <section class="dashboard-grid">
-            <div class="panel dataset-panel">
+            <div class="panel controls-panel">
                 <div class="controls-bar">
                     <button id="toggle-run" class="primary" title="播放或暂停训练">
                         <svg class="icon-play" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="6,3 20,12 6,21"/></svg>
                         <svg class="icon-pause" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style="display:none"><rect x="5" y="3" width="4" height="18"/><rect x="15" y="3" width="4" height="18"/></svg>
-                        <span class="btn-label-play">播放</span>
+                        <span class="btn-label-play">训练</span>
                         <span class="btn-label-pause" style="display:none">暂停</span>
                     </button>
                     <button id="reset-net" class="icon-btn" title="重置网络">
@@ -589,13 +669,27 @@
                         <input id="max-epoch" type="range" min="1000" max="100000" step="1000" value="30000">
                     </label>
                 </div>
-                <div class="plot-shell">
-                    <svg id="playground" viewBox="0 0 520 520" role="img" aria-label="二维分类训练画布"></svg>
-                    <div class="colorbar" aria-hidden="true">
-                        <div class="colorbar-title">sigmoid<br>输出概率</div>
-                        <div>1.0</div>
-                        <div class="colorbar-ramp"></div>
-                        <div>0.0</div>
+            </div>
+
+            <div class="panel dataset-panel">
+                <div class="dataset-grid">
+                    <div class="axis-y-wrap">
+                        <div class="axis-y-label">x₂</div>
+                        <input id="input-x2" type="range" min="0" max="1" step="0.01" value="0.5">
+                        <div id="x2-label" class="axis-y-value">0.50</div>
+                    </div>
+                    <div class="plot-shell">
+                        <svg id="playground" viewBox="0 0 520 520" role="img" aria-label="二维分类训练画布"></svg>
+                        <div class="colorbar" aria-hidden="true">
+                            <div class="colorbar-title">sigmoid<br>输出概率</div>
+                            <div>1.0</div>
+                            <div class="colorbar-ramp"></div>
+                            <div>0.0</div>
+                        </div>
+                    </div>
+                    <div class="axis-x-wrap">
+                        <input id="input-x1" type="range" min="0" max="1" step="0.01" value="0.5">
+                        <div class="axis-x-label">x₁ <span id="x1-label">0.50</span></div>
                     </div>
                 </div>
             </div>
@@ -607,7 +701,7 @@
                     </div>
                 </div>
                 <svg id="network" viewBox="0 0 560 260" role="img" aria-label="神经网络结构图"></svg>
-                <p class="caption" style="padding: 0 24px 16px;">节点颜色表示激活值（a），绿色线为前向传播，红色线为反向传播</p>
+                <p class="caption" style="padding: 0 24px 16px;">节点颜色表示激活值（a），实线为前向传播，虚线为反向传播，线宽表示权重/梯度大小</p>
             </div>
 
             <div class="panel loss-panel">
@@ -630,11 +724,6 @@
             </div>
 
         </section>
-
-        <footer class="footer-line">
-            <span>Design with clarity. Learn with depth.</span>
-            <span>© 2024 Interactive Learning System</span>
-        </footer>
     </main>
     <div id="tooltip" class="tip"></div>
 
@@ -836,6 +925,7 @@
     const green = "#254021";
     const ink = "#1a1a1a";
     const paper = "#fffefa";
+    const datasetGrid = document.querySelector(".dataset-grid");
     const playground = document.getElementById("playground");
     const networkSvg = document.getElementById("network");
     const lossChart = document.getElementById("loss-chart");
@@ -863,6 +953,8 @@
     let maxTrainingEpochs = 30000;
     let lastActivations = Engine.forward(net, [0.5, 0.5]).activations;
     let lastGradients = null;
+    let userX1 = 0.5;
+    let userX2 = 0.5;
 
     function svgEl(name, attrs = {}) {
         const el = document.createElementNS("http://www.w3.org/2000/svg", name);
@@ -878,6 +970,30 @@
 
     function plotY(y) {
         return height - pad - y * (height - pad * 2);
+    }
+
+    function syncPlaygroundControls() {
+        const rect = playground.getBoundingClientRect();
+        if (rect.width === 0 || rect.height === 0) return;
+        const gridRect = datasetGrid.getBoundingClientRect();
+
+        const scale = Math.min(rect.width / width, rect.height / height);
+        const renderedWidth = width * scale;
+        const renderedHeight = height * scale;
+        const offsetX = (rect.width - renderedWidth) / 2;
+        const offsetY = (rect.height - renderedHeight) / 2;
+        const axisLeft = offsetX + pad * scale;
+        const axisHeight = (height - pad * 2) * scale;
+        const colorbarRampHeight = Math.max(80, Math.min(axisHeight, renderedHeight - 96));
+
+        datasetGrid.style.setProperty("--axis-left", `${axisLeft}px`);
+        datasetGrid.style.setProperty("--axis-top", `${offsetY + pad * scale}px`);
+        datasetGrid.style.setProperty("--axis-width", `${(width - pad * 2) * scale}px`);
+        datasetGrid.style.setProperty("--axis-height", `${axisHeight}px`);
+        datasetGrid.style.setProperty("--svg-top", `${rect.top - gridRect.top}px`);
+        datasetGrid.style.setProperty("--svg-height", `${rect.height}px`);
+        datasetGrid.style.setProperty("--y-slider-left", `${Math.max(0, rect.left - gridRect.left + axisLeft - 76)}px`);
+        datasetGrid.style.setProperty("--colorbar-ramp-height", `${colorbarRampHeight}px`);
     }
 
     function colorMix(value, alpha = 0.18) {
@@ -937,6 +1053,20 @@
                 class: "point",
             }));
         }
+
+        // 十字光标：颜色表示 sigmoid 预测值
+        const crosshairOutput = Engine.forward(net, [userX1, userX2]).activations.at(-1)[0];
+        const cx = plotX(userX1);
+        const cy = plotY(userX2);
+        const chColor = colorMix(crosshairOutput, 1);
+        // 白色轮廓确保可见
+        playground.appendChild(svgEl("line", { x1: pad, y1: cy, x2: width - pad, y2: cy, stroke: "rgba(255,255,255,0.6)", "stroke-width": 4 }));
+        playground.appendChild(svgEl("line", { x1: cx, y1: pad, x2: cx, y2: height - pad, stroke: "rgba(255,255,255,0.6)", "stroke-width": 4 }));
+        // 彩色十字线
+        playground.appendChild(svgEl("line", { x1: pad, y1: cy, x2: width - pad, y2: cy, stroke: chColor, "stroke-width": 2, "stroke-dasharray": "6 3" }));
+        playground.appendChild(svgEl("line", { x1: cx, y1: pad, x2: cx, y2: height - pad, stroke: chColor, "stroke-width": 2, "stroke-dasharray": "6 3" }));
+        // 中心点
+        playground.appendChild(svgEl("circle", { cx, cy, r: 5, fill: chColor, stroke: "#fff", "stroke-width": 2 }));
     }
 
     function showTip(event, lines) {
@@ -952,6 +1082,9 @@
 
     function renderNetwork() {
         networkSvg.textContent = "";
+        const userActivations = Engine.forward(net, [userX1, userX2]).activations;
+        // 输入层固定为用户输入值
+        userActivations[0] = [userX1, userX2];
         const layers = [2, 3, 2, 3, 1];
         const xs = [40, 155, 280, 405, 520];
         const positions = [];
@@ -982,19 +1115,24 @@
                     const nx = -dy / segLen;
                     const ny = dx / segLen;
                     const cpOffset = dx * 0.4;
+                    const nodeR = 22;
+                    // 沿连线方向从圆心缩进到圆边缘
+                    const marginX = dx / segLen * nodeR;
+                    const marginY = dy / segLen * nodeR;
+
                     const forwardWidth = Math.max(1, 0.5 + Math.min(3, Math.abs(w) * 2));
                     const backwardWidth = Math.max(1, 0.5 + Math.min(3, Math.log2(1 + Math.abs(grad) * 200) * 1.2));
                     const forwardShift = forwardWidth / 2 + 0.5;
                     const backwardShift = backwardWidth / 2 + 0.5;
 
-                    // 前向传播：下方（+n 方向）
-                    const fsx = start.x + nx * forwardShift;
-                    const fsy = start.y + ny * forwardShift;
-                    const fex = end.x + nx * forwardShift;
-                    const fey = end.y + ny * forwardShift;
+                    // 前向传播：下方（+n 方向），箭头从左到右
+                    const fsx = start.x + marginX + nx * forwardShift;
+                    const fsy = start.y + marginY + ny * forwardShift;
+                    const fex = end.x - marginX + nx * forwardShift;
+                    const fey = end.y - marginY + ny * forwardShift;
                     const forwardLine = svgEl("path", {
                         d: `M${fsx},${fsy} C${fsx + cpOffset},${fsy} ${fex - cpOffset},${fey} ${fex},${fey}`,
-                        stroke: green,
+                        stroke: ink,
                         "stroke-width": forwardWidth,
                         fill: "none",
                         class: "connection",
@@ -1003,16 +1141,17 @@
                     forwardLine.addEventListener("mouseleave", hideTip);
                     networkSvg.appendChild(forwardLine);
 
-                    // 反向传播：上方（-n 方向），也从左到右绘制
-                    const bsx = start.x - nx * backwardShift;
-                    const bsy = start.y - ny * backwardShift;
-                    const bex = end.x - nx * backwardShift;
-                    const bey = end.y - ny * backwardShift;
+                    // 反向传播：上方（-n 方向），箭头从右到左
+                    const bsx = end.x - marginX - nx * backwardShift;
+                    const bsy = end.y - marginY - ny * backwardShift;
+                    const bex = start.x + marginX - nx * backwardShift;
+                    const bey = start.y + marginY - ny * backwardShift;
                     const backwardLine = svgEl("path", {
-                        d: `M${bsx},${bsy} C${bsx + cpOffset},${bsy} ${bex - cpOffset},${bey} ${bex},${bey}`,
-                        stroke: red,
+                        d: `M${bsx},${bsy} C${bsx - cpOffset},${bsy} ${bex + cpOffset},${bey} ${bex},${bey}`,
+                        stroke: ink,
                         "stroke-width": backwardWidth,
                         fill: "none",
+                        "stroke-dasharray": `${backwardWidth * 2.5} ${backwardWidth * 1.8}`,
                         class: "connection",
                     });
                     backwardLine.addEventListener("mousemove", (event) => showTip(event, [`gradient: ${grad.toFixed(4)}`]));
@@ -1028,20 +1167,40 @@
             networkSvg.appendChild(label);
 
             for (let j = 0; j < layers[l]; j++) {
-                const activation = lastActivations[l]?.[j] ?? 0;
-                const shade = Math.round(245 - activation * 155);
+                const activation = userActivations[l]?.[j] ?? 0;
+                let fill;
+                if (l === layers.length - 1) {
+                    // 输出层：与 colorbar 一致的红-浅-绿三段渐变
+                    const red = [141, 31, 31];    // #8d1f1f
+                    const mid = [239, 225, 216];  // #efe1d8
+                    const green = [22, 69, 31];   // #16451f
+                    let r, g, b;
+                    if (activation >= 0.5) {
+                        const t = (activation - 0.5) * 2;
+                        r = Math.round(mid[0] * (1 - t) + red[0] * t);
+                        g = Math.round(mid[1] * (1 - t) + red[1] * t);
+                        b = Math.round(mid[2] * (1 - t) + red[2] * t);
+                    } else {
+                        const t = activation * 2;
+                        r = Math.round(green[0] * (1 - t) + mid[0] * t);
+                        g = Math.round(green[1] * (1 - t) + mid[1] * t);
+                        b = Math.round(green[2] * (1 - t) + mid[2] * t);
+                    }
+                    fill = `rgb(${r}, ${g}, ${b})`;
+                } else {
+                    // 输入/隐藏层：激活值 0 → 白色 #ffffff，1 → #e0d4c0
+                    const r = Math.round(255 - activation * 85);
+                    const g = Math.round(255 - activation * 95);
+                    const b = Math.round(255 - activation * 115);
+                    fill = `rgb(${r}, ${g}, ${b})`;
+                }
                 const circle = svgEl("circle", {
                     cx: positions[l][j].x,
                     cy: positions[l][j].y,
                     r: 22,
-                    fill: `rgb(${shade}, ${shade}, ${shade})`,
+                    fill,
                     class: "neuron",
                 });
-                circle.addEventListener("mousemove", (event) => {
-                    const bias = l === 0 ? "input" : net.biases[l - 1][j].toFixed(4);
-                    showTip(event, [`activation: ${activation.toFixed(4)}`, `bias: ${bias}`]);
-                });
-                circle.addEventListener("mouseleave", hideTip);
                 networkSvg.appendChild(circle);
 
                 const value = svgEl("text", {
@@ -1049,7 +1208,7 @@
                     y: positions[l][j].y + 4,
                     "text-anchor": "middle",
                     class: "tiny-label",
-                    fill: activation > 0.65 ? paper : ink,
+                    fill: (l === layers.length - 1) ? (activation > 0.25 && activation < 0.75 ? ink : paper) : (activation > 0.65 ? paper : ink),
                 });
                 value.textContent = activation.toFixed(2);
                 networkSvg.appendChild(value);
@@ -1061,23 +1220,29 @@
         lossChart.textContent = "";
         const left = 44;
         const right = 420;
-        const top = 18;
+        const top = 30;
         const bottom = 104;
         const chartWidth = right - left;
         const chartHeight = bottom - top;
         const minEpoch = 0;
         const maxEpoch = maxTrainingEpochs;
         const maxLoss = Math.max(...lossHistory.map((item) => item.loss), 0.001);
+        // 漂亮线性刻度：选择合适的步长，使刻度值为整数或简单小数
+        const niceSteps = [0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1, 2, 5];
+        const step = niceSteps.find(s => maxLoss / s <= 5) || niceSteps[niceSteps.length - 1];
+        const yMax = Math.ceil(maxLoss / step) * step;
+        const tickCount = Math.round(yMax / step);
 
         lossChart.appendChild(svgEl("line", { x1: left, y1: bottom, x2: right, y2: bottom, stroke: "#d8d3cc" }));
         lossChart.appendChild(svgEl("line", { x1: left, y1: top, x2: left, y2: bottom, stroke: "#d8d3cc" }));
 
-        for (let i = 0; i <= 4; i++) {
-            const y = bottom - i * chartHeight / 4;
-            const value = maxLoss * i / 4;
+        for (let i = 0; i <= tickCount; i++) {
+            const y = bottom - (i / tickCount) * chartHeight;
+            const value = i * step;
             lossChart.appendChild(svgEl("line", { x1: left, y1: y, x2: right, y2: y, stroke: "#e5ded2", "stroke-dasharray": "3 4" }));
-            const label = svgEl("text", { x: left - 8, y: y + 4, "text-anchor": "end", class: "tiny-label" });
-            label.textContent = value.toFixed(value >= 0.1 ? 1 : 2);
+            const label = svgEl("text", { x: left - 8, y: y + 4, "text-anchor": "end", class: "tiny-label", fill: ink });
+            const decimals = step < 0.1 ? 2 : (step < 1 ? 1 : 0);
+            label.textContent = value.toFixed(decimals);
             lossChart.appendChild(label);
         }
 
@@ -1085,15 +1250,15 @@
             const x = left + i * chartWidth / 4;
             const value = minEpoch + (maxEpoch - minEpoch) * i / 4;
             lossChart.appendChild(svgEl("line", { x1: x, y1: top, x2: x, y2: bottom, stroke: "#e5ded2", "stroke-dasharray": "3 4" }));
-            const label = svgEl("text", { x, y: bottom + 18, "text-anchor": "middle", class: "tiny-label" });
+            const label = svgEl("text", { x, y: bottom + 18, "text-anchor": "middle", class: "tiny-label", fill: ink });
             label.textContent = Math.round(value);
             lossChart.appendChild(label);
         }
 
-        const yTitle = svgEl("text", { x: 12, y: top + 5, class: "tiny-label" });
+        const yTitle = svgEl("text", { x: left - 8, y: top - 12, "text-anchor": "end", class: "tiny-label", fill: ink });
         yTitle.textContent = "Loss";
         lossChart.appendChild(yTitle);
-        const xTitle = svgEl("text", { x: right, y: bottom + 38, "text-anchor": "end", class: "tiny-label" });
+        const xTitle = svgEl("text", { x: right, y: bottom + 38, "text-anchor": "end", class: "tiny-label", fill: ink });
         xTitle.textContent = "Epoch";
         lossChart.appendChild(xTitle);
         if (lossHistory.length < 2) return;
@@ -1102,7 +1267,7 @@
         if (sampled.length < 2) return;
         const points = sampled.map((item) => {
             const x = left + ((item.epoch - minEpoch) / Math.max(1, maxEpoch - minEpoch)) * chartWidth;
-            const y = bottom - (item.loss / maxLoss) * chartHeight;
+            const y = bottom - (item.loss / yMax) * chartHeight;
             return `${x},${y}`;
         });
         lossChart.appendChild(svgEl("polyline", {
@@ -1136,7 +1301,6 @@
             return;
         }
         setPhase(0);
-        lastActivations = Engine.forward(net, samples[epoch % samples.length].input).activations;
         setPhase(1);
         const learningRate = Number(lrInput.value);
         setPhase(2);
@@ -1167,7 +1331,6 @@
         epoch = 0;
         latestLoss = 0;
         lossHistory = [];
-        lastActivations = Engine.forward(net, [0.5, 0.5]).activations;
         setPhase(0);
         updateMetrics();
         renderPlayground();
@@ -1190,8 +1353,30 @@
         maxTrainingEpochs = Number(maxEpochInput.value);
         maxEpochLabel.textContent = maxTrainingEpochs;
     });
+    const x1Input = document.getElementById("input-x1");
+    const x1Label = document.getElementById("x1-label");
+    const x2Input = document.getElementById("input-x2");
+    const x2Label = document.getElementById("x2-label");
+    x1Input.addEventListener("input", () => {
+        userX1 = Number(x1Input.value);
+        x1Label.textContent = userX1.toFixed(2);
+        renderPlayground();
+        renderNetwork();
+    });
+    x2Input.addEventListener("input", () => {
+        userX2 = Number(x2Input.value);
+        x2Label.textContent = userX2.toFixed(2);
+        renderPlayground();
+        renderNetwork();
+    });
+    if ("ResizeObserver" in window) {
+        new ResizeObserver(syncPlaygroundControls).observe(playground);
+    } else {
+        window.addEventListener("resize", syncPlaygroundControls);
+    }
     const initialPredictions = samples.map((s) => Engine.forward(net, s.input).activations.at(-1));
     lossHistory.push({ epoch: 0, loss: Engine.computeLoss(initialPredictions, samples.map((s) => s.target)) });
+    syncPlaygroundControls();
     renderPlayground();
     renderNetwork();
     renderLossChart();
