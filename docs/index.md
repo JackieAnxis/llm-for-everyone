@@ -8,8 +8,5 @@ hero:
   actions:
     - theme: brand
       text: 开始阅读
-      link: /00-neural_network/01-what-is-neural-network
-    - theme: alt
-      text: 推理过程
-      link: /01-inference/01-overview
+      link: /00-neural_network/00-overview
 ---
